@@ -15,7 +15,8 @@ rustup target add aarch64-unknown-none
 
 ## For QEMU
 
-Run `cargo build`. ELF output will be located at `target/aarch64-unknown-none/debug/osdev`.
+Run `cargo build_device`. ELF output will be located at
+`target/aarch64-unknown-none/debug/osdev`.
 
 Then, execute QEMU:
 ```
@@ -35,7 +36,15 @@ rustup component add llvm-tools
 
 Build, and strip image for bare metal:
 ```
-cargo objcopy -- -O binary osdev.img
+cargo build_device_img
 ```
 
 The image will be on the root project.
+
+## Testing
+
+We have some on-host tests especially for data structures. Run test with
+
+```
+cargo test
+```
