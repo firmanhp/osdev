@@ -1,0 +1,22 @@
+[package]
+name = "osdev"
+version = "0.0.1"
+edition = "2021"
+
+[features]
+default = []
+host = []
+device = []
+
+[dependencies]
+
+[profile.test]
+features = ["host"]
+
+[profile.dev]
+features = ["device"]
+panic = "abort"
+
+[profile.release]
+features = ["device"]
+panic = "abort"
