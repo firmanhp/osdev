@@ -2,7 +2,7 @@ use crate::board_info;
 use crate::common;
 use crate::io::uart;
 
-pub fn test_uart() {
+pub fn test_uart() -> ! {
   use common::stream;
 
   uart::pl011_init();

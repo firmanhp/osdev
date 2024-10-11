@@ -20,7 +20,7 @@ extern "C" fn kernel_main() {
   mmio::init();
   uart::pl011_init();
 
-  diagnostic::test_uart();
+  diagnostic::test_mailbox();
 }
 
 #[cfg(not(feature = "device"))]
