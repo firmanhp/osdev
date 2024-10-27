@@ -115,21 +115,21 @@ pub fn pl011_init() {
   // Baud rate divisor BAUDDIV = (FUARTCLK/(16 Baud rate))
   // where FUARTCLK is the UART reference clock frequency.
   // The BAUDDIV is comprised of the integer value IBRD and the fractional value FBRD.
-  let base_clk_rate_hz = clock::get_clock_info(clock::ClockId::UART)
-    .and_then(|c| Ok(c.rate_hz))
-    .unwrap_or(3000000);
+  // let base_clk_rate_hz = clock::get_clock_info(clock::ClockId::UART)
+  //   .and_then(|c| Ok(c.rate_hz))
+  //   .unwrap_or(3000000);
 
   // Set baud rate to 115200bps
   // Divider = 3000000 / (16 * 115200) = 1.627 = ~1.
   // only first 16 bits
-  let divider_integer: u32 = base_clk_rate_hz / (16 * 115200);
+  // let divider_integer: u32 = base_clk_rate_hz / (16 * 115200);
   // mmio::write(Reg::PL011_IBRD, divider_integer & 0x0000_FFFF);
   // Get the fractional part without floating point manipulation
-  let divider_fractional = {
-    let remainder = base_clk_rate_hz % (16 * 115200);
-    // Bring the first 6 bits to integer part
-    (remainder * (1 << 6)) / (16 * 115200)
-  };
+  // let divider_fractional = {
+  //   let remainder = base_clk_rate_hz % (16 * 115200);
+  //   // Bring the first 6 bits to integer part
+  //   (remainder * (1 << 6)) / (16 * 115200)
+  // };
   // Fractional part register = (.627 * 64) + 0.5 = 40.6 = ~40.
   // mmio::write(Reg::PL011_FBRD, divider_fractional & 0x00000_003F);
 
@@ -148,7 +148,9 @@ pub fn pl011_init() {
   );
 
   // Set the output stream to use this
-  common::stream::set_out(common::stream::OutputOps { write: pl011_puts });
+  common::stream::set_out(common::stream::OutputOps {
+    write: pl011_puts_result,
+  });
 }
 
 pub fn pl011_getc() -> u8 {
@@ -163,9 +165,13 @@ pub fn pl011_putc(c: u8) {
   mmio::write(Reg::PL011_DR, c as u32);
 }
 
-pub fn pl011_puts(s: &str) -> core::result::Result<(), common::error::ErrorKind> {
+pub fn pl011_puts(s: &str) {
   for c in s.as_bytes() {
     pl011_putc(*c);
   }
+}
+
+fn pl011_puts_result(s: &str) -> Result<(), common::error::ErrorKind> {
+  pl011_puts(s);
   Ok(())
 }

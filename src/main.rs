@@ -1,12 +1,12 @@
 #![cfg_attr(feature = "device", no_std)]
 #![cfg_attr(feature = "device", no_main)]
 
-mod board_info;
 mod boot;
 mod common;
 mod container;
 mod diagnostic;
 mod io;
+mod meta;
 mod synchronization;
 
 use io::gpio;
@@ -20,7 +20,7 @@ extern "C" fn kernel_main() {
   mmio::init();
   uart::pl011_init();
 
-  diagnostic::test_mailbox();
+  diagnostic::test_board_info();
 }
 
 #[cfg(not(feature = "device"))]
@@ -33,7 +33,10 @@ fn on_panic_impl(info: &core::panic::PanicInfo) -> ! {
 
   uart::pl011_init();
 
-  stream::println!("PANIC: {}", info.message().as_str().unwrap_or("No message"));
+  stream::println!(
+    "PANIC: {}",
+    info.message().as_str().unwrap_or("No message")
+  );
 
   if let Some(location) = info.location() {
     stream::println!("{}:{}", location.file(), location.line());

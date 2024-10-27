@@ -1,14 +1,14 @@
-use crate::board_info;
+use crate::meta::board_info;
 
 static mut BASE_ADDR: u64 = 0;
 
 pub fn init() {
-  let board_type = board_info::get_board_info();
+  let board_type = board_info::raspi_board_type();
   unsafe {
-    use board_info::BoardType;
+    use board_info::RaspiBoardType;
     match board_type {
-      BoardType::PI_2 | BoardType::PI_3 => BASE_ADDR = 0x3F000000,
-      BoardType::PI_4 => BASE_ADDR = 0xFE000000,
+      RaspiBoardType::Pi2 | RaspiBoardType::Pi3 => BASE_ADDR = 0x3F000000,
+      RaspiBoardType::Pi4 => BASE_ADDR = 0xFE000000,
       // (should be unreachable)
       // for raspi1, raspi zero etc.
       _ => BASE_ADDR = 0x20000000,

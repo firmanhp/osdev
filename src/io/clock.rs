@@ -1,88 +1,111 @@
 use crate::common::error::ErrorKind;
 use crate::io::mailbox;
+use crate::io::mailbox::tag::GetClockRate;
+use crate::io::mailbox::tag::GetClockState;
+use crate::io::mailbox::Message;
 
 // Clock IDs
-pub struct ClockId;
+#[repr(u32)]
 #[allow(dead_code)]
+#[derive(Copy, Clone, Debug)]
+pub enum ClockId {
+  Emmc = 0x1,
+  Uart = 0x2,
+  Arm = 0x3,
+  Core = 0x4,
+  V3d = 0x5,
+  H264 = 0x6,
+  Isp = 0x7,
+  Sdram = 0x8,
+  Pixel = 0x9,
+  Pwm = 0xa,
+  Hevc = 0xb,
+  Emmc2 = 0xc,
+  M2mc = 0xd,
+  PixelBvb = 0xe,
+}
+
 impl ClockId {
-  pub const EMMC: u32 = 0x000000001;
-  pub const UART: u32 = 0x000000002;
-  pub const ARM: u32 = 0x000000003;
-  pub const CORE: u32 = 0x000000004;
-  pub const V3D: u32 = 0x000000005;
-  pub const H264: u32 = 0x000000006;
-  pub const ISP: u32 = 0x000000007;
-  pub const SDRAM: u32 = 0x000000008;
-  pub const PIXEL: u32 = 0x000000009;
-  pub const PWM: u32 = 0x00000000a;
-  pub const HEVC: u32 = 0x00000000b;
-  pub const EMMC2: u32 = 0x00000000c;
-  pub const M2MC: u32 = 0x00000000d;
-  pub const PIXEL_BVB: u32 = 0x00000000e;
+  pub fn as_str(&self) -> &str {
+    match self {
+      ClockId::Emmc => "Emmc",
+      ClockId::Uart => "Uart",
+      ClockId::Arm => "Arm",
+      ClockId::Core => "Core",
+      ClockId::V3d => "V3d",
+      ClockId::H264 => "H264",
+      ClockId::Isp => "Isp",
+      ClockId::Sdram => "Sdram",
+      ClockId::Pixel => "Pixel",
+      ClockId::Pwm => "Pwm",
+      ClockId::Hevc => "Hevc",
+      ClockId::Emmc2 => "Emmc2",
+      ClockId::M2mc => "M2mc",
+      ClockId::PixelBvb => "PixelBvb",
+    }
+  }
+}
+
+impl core::fmt::Display for ClockId {
+  fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    write!(f, "{}", self.as_str())
+  }
 }
 
 pub struct ClockInfo {
-  pub id: u32,
+  pub id: ClockId,
   pub active: bool,
   pub exists: bool,
   // Base clock rate.
   pub rate_hz: u32,
 }
 
-pub fn get_clock_info(clock_id: u32) -> Result<ClockInfo, ErrorKind> {
-  let id = clock_id;
+pub fn get_clock_info(clock_id: ClockId) -> Result<ClockInfo, ErrorKind> {
   let active: bool;
   let exists: bool;
   let rate_hz: u32;
-  // Get clock state
-  {
-    // Req 4 bytes (1w)
-    // Resp 8 bytes (2w)
-    // + tag info (12 bytes) (3w)
-    let clock_state_tag = mailbox::tag::GetClockState { clock_id };
-    let message = mailbox::send(
-      mailbox::Message::<6>::builder()
-        .add_tag(&clock_state_tag)
-        .build(),
-    );
-    let len_bytes = value_len_bytes(message.tag_buf[2]);
-    if len_bytes != 8 {
-      return Err(ErrorKind::InvalidData);
-    }
-    // clock_id = message.tag_buf[3]
-    let state_raw = message.tag_buf[4];
-    active = state_raw & (1 << 0) != 0;
-    exists = state_raw & (1 << 1) != 0;
-    if !exists {
-      return Err(ErrorKind::NotFound);
-    }
+
+  let clock_rate_tag: GetClockRate::Tag = GetClockRate::Request {
+    clock_id: clock_id as u32,
   }
-  {
-    // Req 4 bytes (1w)
-    // Resp 8 bytes (2w)
-    // + tag info (12 bytes) (3w)
-    let clock_rate_tag = mailbox::tag::GetClockRate { clock_id };
-    let message = mailbox::send(
-      mailbox::Message::<6>::builder()
-        .add_tag(&clock_rate_tag)
-        .build(),
-    );
-    let len_bytes = value_len_bytes(message.tag_buf[2]);
-    if len_bytes != 8 {
-      return Err(ErrorKind::InvalidData);
+  .into();
+  let clock_state_tag: GetClockState::Tag = GetClockState::Request {
+    clock_id: clock_id as u32,
+  }
+  .into();
+
+  let message = mailbox::send(
+    Message::<
+      { GetClockRate::Tag::MESSAGE_LEN + GetClockState::Tag::MESSAGE_LEN },
+    >::builder()
+    .add_tag(&clock_rate_tag)
+    .add_tag(&clock_state_tag)
+    .build(),
+  );
+
+  match GetClockRate::read_response(&message) {
+    Ok(response) => {
+      rate_hz = unsafe {
+        core::ptr::read_unaligned(core::ptr::addr_of!(response.rate_hz))
+      };
     }
-    rate_hz = message.tag_buf[4];
+    Err(_) => panic!("Error in retrieving GetClockRate"),
+  }
+  match GetClockState::read_response(&message) {
+    Ok(response) => {
+      let state_bits = unsafe {
+        core::ptr::read_unaligned(core::ptr::addr_of!(response.state_bits))
+      };
+      active = (state_bits & (1 << 0)) != 0;
+      exists = (state_bits & (1 << 1)) != 0;
+    }
+    Err(_) => panic!("Error in retrieving GetClockState"),
   }
 
   Ok(ClockInfo {
-    id,
+    id: clock_id,
     active,
     exists,
     rate_hz,
   })
-}
-
-#[inline(always)]
-fn value_len_bytes(raw_response: u32) -> u32 {
-  raw_response & !(1 << 31)
 }

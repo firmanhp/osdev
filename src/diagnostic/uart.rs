@@ -1,6 +1,6 @@
-use crate::board_info;
 use crate::common;
 use crate::io::uart;
+use crate::meta;
 
 pub fn test_uart() -> ! {
   use common::stream;
@@ -9,9 +9,9 @@ pub fn test_uart() -> ! {
   stream::println!("UART TEST");
   stream::println!("Hello, kernel World from Rust!");
 
-  match board_info::get_board_info() {
-    board_info::BoardType::PI_3 => stream::println!("I am RPi 3"),
-    board_info::BoardType::PI_4 => stream::println!("I am RPi 4"),
+  match meta::board_info::raspi_board_type() {
+    meta::board_info::RaspiBoardType::Pi3 => stream::println!("I am RPi 3"),
+    meta::board_info::RaspiBoardType::Pi4 => stream::println!("I am RPi 4"),
     _ => stream::println!("I am RPi unsupported"),
   };
 

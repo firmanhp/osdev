@@ -1,6 +1,7 @@
 // Copy of https://doc.rust-lang.org/std/io/enum.ErrorKind.html
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum ErrorKind {
   /// An entity was not found, often a file.
   NotFound,
@@ -175,4 +176,58 @@ pub enum ErrorKind {
   /// [`ErrorKind`] variant in the future. It is not recommended to match
   /// an error against `Uncategorized`; use a wildcard match (`_`) instead.
   Uncategorized,
+}
+
+impl ErrorKind {
+  fn as_str(&self) -> &str {
+    match self {
+      ErrorKind::NotFound => "NotFound",
+      ErrorKind::PermissionDenied => "PermissionDenied",
+      ErrorKind::ConnectionRefused => "ConnectionRefused",
+      ErrorKind::ConnectionReset => "ConnectionReset",
+      ErrorKind::HostUnreachable => "HostUnreachable",
+      ErrorKind::NetworkUnreachable => "NetworkUnreachable",
+      ErrorKind::ConnectionAborted => "ConnectionAborted",
+      ErrorKind::NotConnected => "NotConnected",
+      ErrorKind::AddrInUse => "AddrInUse",
+      ErrorKind::AddrNotAvailable => "AddrNotAvailable",
+      ErrorKind::NetworkDown => "NetworkDown",
+      ErrorKind::BrokenPipe => "BrokenPipe",
+      ErrorKind::AlreadyExists => "AlreadyExists",
+      ErrorKind::WouldBlock => "WouldBlock",
+      ErrorKind::NotADirectory => "NotADirectory",
+      ErrorKind::IsADirectory => "IsADirectory",
+      ErrorKind::DirectoryNotEmpty => "DirectoryNotEmpty",
+      ErrorKind::ReadOnlyFilesystem => "ReadOnlyFilesystem",
+      ErrorKind::FilesystemLoop => "FilesystemLoop",
+      ErrorKind::StaleNetworkFileHandle => "StaleNetworkFileHandle",
+      ErrorKind::InvalidInput => "InvalidInput",
+      ErrorKind::InvalidData => "InvalidData",
+      ErrorKind::TimedOut => "TimedOut",
+      ErrorKind::WriteZero => "WriteZero",
+      ErrorKind::StorageFull => "StorageFull",
+      ErrorKind::NotSeekable => "NotSeekable",
+      ErrorKind::FilesystemQuotaExceeded => "FilesystemQuotaExceeded",
+      ErrorKind::FileTooLarge => "FileTooLarge",
+      ErrorKind::ResourceBusy => "ResourceBusy",
+      ErrorKind::ExecutableFileBusy => "ExecutableFileBusy",
+      ErrorKind::Deadlock => "Deadlock",
+      ErrorKind::CrossesDevices => "CrossesDevices",
+      ErrorKind::TooManyLinks => "TooManyLinks",
+      ErrorKind::InvalidFilename => "InvalidFilename",
+      ErrorKind::ArgumentListTooLong => "ArgumentListTooLong",
+      ErrorKind::Interrupted => "Interrupted",
+      ErrorKind::Unsupported => "Unsupported",
+      ErrorKind::UnexpectedEof => "UnexpectedEof",
+      ErrorKind::OutOfMemory => "OutOfMemory",
+      ErrorKind::Other => "Other",
+      ErrorKind::Uncategorized => "Uncategorized",
+    }
+  }
+}
+
+impl core::fmt::Display for ErrorKind {
+  fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    write!(f, "{}", self.as_str())
+  }
 }
