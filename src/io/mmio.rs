@@ -1,3 +1,4 @@
+use crate::asm::barrier;
 use crate::meta::board_info;
 
 static mut BASE_ADDR: u64 = 0;
@@ -18,10 +19,17 @@ pub fn init() {
 
 #[inline(always)]
 pub fn write(addr: u64, data: u32) {
+  // let's revisit later on the barrier...
+  barrier::aarch64::data_memory!("sy");
   unsafe { core::ptr::write_volatile((BASE_ADDR + addr) as *mut u32, data) }
+  barrier::aarch64::data_memory!("sy");
 }
 
 #[inline(always)]
 pub fn read(addr: u64) -> u32 {
-  unsafe { core::ptr::read_volatile((BASE_ADDR + addr) as *mut u32) }
+  // let's revisit later on the barrier...
+  barrier::aarch64::data_memory!("sy");
+  let ret = unsafe { core::ptr::read_volatile((BASE_ADDR + addr) as *mut u32) };
+  barrier::aarch64::data_memory!("sy");
+  ret
 }
