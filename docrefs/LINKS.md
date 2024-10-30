@@ -19,3 +19,6 @@ https://forums.raspberrypi.com/viewtopic.php?f=72&t=72260
 https://os.phil-opp.com/freestanding-rust-binary/
 
 https://lowenware.com/blog/aarch64-bare-metal-program-in-rust/
+
+https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/memory-access-ordering---an-introduction
+

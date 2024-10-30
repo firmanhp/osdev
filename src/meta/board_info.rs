@@ -73,9 +73,7 @@ pub fn raspi_board_type() -> RaspiBoardType {
   // https://developer.arm.com/documentation/ddi0602/2024-06/Base-Instructions/MRS--Move-System-register-to-general-purpose-register-?lang=en
   // MIDR_EL1
   // https://developer.arm.com/documentation/ddi0601/2024-06/External-Registers/MIDR-EL1--Main-ID-Register?lang=en
-  unsafe {
-    core::arch::asm!("mrs {0:x}, midr_el1", out(reg) id);
-  }
+  unsafe { core::arch::asm!("mrs {0:x}, midr_el1", out(reg) id) };
   let part_num: u32 = (id >> 4) & 0xFFF;
   return RaspiBoardType::from(part_num);
 }

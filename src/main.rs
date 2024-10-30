@@ -1,6 +1,7 @@
 #![cfg_attr(feature = "device", no_std)]
 #![cfg_attr(feature = "device", no_main)]
 
+mod asm;
 mod boot;
 mod common;
 mod container;
