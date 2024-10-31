@@ -20,6 +20,4 @@ pub mod tag;
 
 pub use message::send;
 pub use message::Message;
-pub use message::MessageBuilder;
 pub use message::MessageView;
-pub use message::ResponseCode;

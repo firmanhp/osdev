@@ -53,7 +53,7 @@ pub mod aarch64 {
     };
   }
 
-  pub use data_memory;
-  pub use data_synchronization;
+  
+  
   pub use instruction_synchronization;
 }

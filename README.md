@@ -46,5 +46,5 @@ The image will be on the root project.
 We have some on-host tests especially for data structures. Run test with
 
 ```
-cargo test
+cargo test --features "aarch64" -- --test-threads=1 
 ```

@@ -1,6 +1,4 @@
 use crate::common;
-use crate::container;
-use crate::io::clock;
 use crate::io::gpio;
 use crate::io::mmio;
 
