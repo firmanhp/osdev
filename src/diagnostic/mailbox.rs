@@ -18,7 +18,7 @@ fn print_message_buf<const N: usize>(message: &Message<N>) -> usize {
 
   stream::println!("::META");
   // First 2 words = Message metadata
-  for (i, val) in buf[0..2].iter().enumerate() {
+  for (_, val) in buf[0..2].iter().enumerate() {
     stream::println!("{:#010X}", val);
   }
 

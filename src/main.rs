@@ -9,53 +9,140 @@ mod diagnostic;
 mod io;
 mod meta;
 mod synchronization;
+mod tty;
 
-use io::gpio;
-use io::mmio;
-use io::uart;
+use core::panic::PanicInfo;
+use io::{gpio, mmio};
+use tty::TTY;
+
+/// Error type for kernel operations
+#[derive(Debug)]
+pub enum KernelError {
+    InitializationError(&'static str),
+    HardwareError(&'static str),
+    IOError(&'static str),
+}
+
+/// Result type alias for kernel operations
+type KernelResult<T> = Result<T, KernelError>;
+
+/// Represents the state and operations of the kernel
+struct Kernel {
+    tty: TTY,
+}
+
+impl Kernel {
+    /// Creates a new Kernel instance, initializing necessary components
+    fn new() -> KernelResult<Self> {
+        mmio::init();
+        let tty = TTY::new();
+        Ok(Self { tty })
+    }
+
+    /// Initializes the kernel and runs diagnostics
+    fn initialize(&self) -> KernelResult<()> {
+        self.tty.write("Kernel initialization started...\n");
+        self.run_diagnostics()?;
+        self.tty.write("Kernel initialization completed successfully.\n");
+        Ok(())
+    }
+
+    /// Runs diagnostic tests on the board
+    fn run_diagnostics(&self) -> KernelResult<()> {
+        self.tty.write("Running board diagnostics...\n");
+        
+        // Running the diagnostics
+        diagnostic::test_board_info();
+        
+        Ok(())
+    }
+}
 
 #[cfg(feature = "device")]
 #[no_mangle]
-#[allow(unused_variables)]
 extern "C" fn kernel_main() {
-  mmio::init();
-  uart::pl011_init();
-
-  diagnostic::test_board_info();
+    match Kernel::new() {
+        Ok(kernel) => {
+            if let Err(e) = kernel.initialize() {
+                handle_kernel_error(&kernel, &e);
+            }
+        }
+        Err(e) => {
+            let tty = TTY::new();
+            tty.write(&format!("Failed to initialize Kernel: {:?}\n", e));
+        }
+    }
 }
 
-#[cfg(not(feature = "device"))]
-fn main() {}
+/// Logs kernel errors to TTY
+fn handle_kernel_error(kernel: &Kernel, error: &KernelError) {
+    kernel.tty.write(&format!("Kernel error: {:?}\n", error));
+}
 
-#[cfg(feature = "device")]
-fn on_panic_impl(info: &core::panic::PanicInfo) -> ! {
-  use common::stream;
-  const GPIO: u64 = 1 << 27;
+/// Structure representing the state during a panic
+struct PanicState {
+    tty: TTY,
+    led_gpio: u64,
+}
 
-  uart::pl011_init();
+impl PanicState {
+    const LED_GPIO: u64 = 1 << 27;
+    const BLINK_DELAY: i32 = 250_000;
 
-  stream::println!(
-    "PANIC: {}",
-    info.message().as_str().unwrap_or("No message")
-  );
+    /// Initializes a new PanicState
+    fn new() -> Self {
+        Self {
+            tty: TTY::new(),
+            led_gpio: Self::LED_GPIO,
+        }
+    }
 
-  if let Some(location) = info.location() {
-    stream::println!("{}:{}", location.file(), location.line());
-  }
+    /// Handles panic by printing details and signaling an error state
+    fn handle_panic(&self, info: &PanicInfo) {
+        self.print_panic_info(info);
+        self.configure_panic_led();
+        self.blink_led_forever();
+    }
 
-  gpio::set_function(GPIO, gpio::Function::Output);
-  gpio::set_pull_mode(GPIO, gpio::PullMode::Disabled);
+    /// Prints panic information to TTY
+    fn print_panic_info(&self, info: &PanicInfo) {
+      self.tty.write("Panic occurred!\n");
+  
+      // Print the panic message directly
+      self.tty.write("PANIC: ");
+      self.tty.write(&format!("{:?}", info.message()));
+      self.tty.write("\n");
+  
+      // Output location information, if available
+      if let Some(location) = info.location() {
+          self.tty.write(&format!(
+              "Location: {}:{}\n",
+              location.file(),
+              location.line()
+          ));
+      }
+    }
+  
+    /// Configures the LED to indicate a panic state
+    fn configure_panic_led(&self) {
+        gpio::set_function(self.led_gpio, gpio::Function::Output);
+        gpio::set_pull_mode(self.led_gpio, gpio::PullMode::Disabled);
+    }
 
-  loop {
-    gpio::output_set(GPIO);
-    synchronization::sleep(250_000);
-    gpio::output_clear(GPIO);
-    synchronization::sleep(250_000);
-  }
+    /// Blinks the LED indefinitely to signal panic
+    fn blink_led_forever(&self) -> ! {
+        loop {
+            gpio::output_set(self.led_gpio);
+            synchronization::sleep(Self::BLINK_DELAY);
+            gpio::output_clear(self.led_gpio);
+            synchronization::sleep(Self::BLINK_DELAY);
+        }
+    }
 }
 
 #[panic_handler]
 #[cfg(feature = "device")]
-fn on_panic(info: &core::panic::PanicInfo) -> ! {
-  on_panic_impl(info)
+fn on_panic(info: &PanicInfo) -> ! {
+    let panic_state = PanicState::new();
+    panic_state.handle_panic(info);
 }
