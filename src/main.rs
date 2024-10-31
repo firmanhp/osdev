@@ -54,7 +54,6 @@ impl Kernel {
         // Running the diagnostics
         diagnostic::test_board_info();
         
-        self.tty.write("Board diagnostics completed successfully.\n");
         Ok(())
     }
 }

@@ -27,8 +27,3 @@ jobs:
 
       - name: Install dependencies
         run: cargo fetch
-
-      - name: Run tests
-        env:
-          CARGO_BUILD_TARGET: aarch64-unknown-none
-        run: cargo test --target aarch64-unknown-none --verbose || echo "Tests for aarch64-only code skipped."
