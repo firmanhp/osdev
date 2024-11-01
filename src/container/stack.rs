@@ -1,6 +1,5 @@
 use core::mem::MaybeUninit;
 
-
 pub struct Stack<T, const N: usize>
 where
   T: Copy,
