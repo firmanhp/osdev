@@ -48,3 +48,29 @@ We have some on-host tests especially for data structures. Run test with
 ```
 cargo test --features "aarch64" -- --test-threads=1 
 ```
+
+## Documentation
+
+You can generate and view the project documentation:
+
+### Generate documentation:
+
+```
+make all
+```
+
+### Serve documentation locally:
+
+```
+make serve
+```
+
+This will serve the documentation at `http://localhost:8000`.
+
+### Clean generated documentation:
+
+```
+make clean
+```
+
+This removes all documentation from the output directory.
