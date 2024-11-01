@@ -37,6 +37,12 @@ pub struct MacAddress {
   data: [u8; 6],
 }
 
+impl MacAddress {
+  pub fn new(data: [u8; 6]) -> Self {
+    MacAddress { data }
+  }
+}
+
 impl core::fmt::Display for MacAddress {
   fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
     write!(
