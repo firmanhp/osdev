@@ -13,7 +13,7 @@ mod tty;
 
 use core::panic::PanicInfo;
 use io::{gpio, mmio};
-use tty::TTY;
+use tty::{TTY, TTYError};
 
 /// Error type for kernel operations
 #[derive(Debug)]
@@ -21,6 +21,14 @@ pub enum KernelError {
     InitializationError(&'static str),
     HardwareError(&'static str),
     IOError(&'static str),
+    TTY(TTYError),
+}
+
+/// Implement conversion from `TTYError` to `KernelError`
+impl From<TTYError> for KernelError {
+    fn from(error: TTYError) -> Self {
+        KernelError::TTY(error)
+    }
 }
 
 /// Result type alias for kernel operations
@@ -40,20 +48,19 @@ impl Kernel {
     }
 
     /// Initializes the kernel and runs diagnostics
-    fn initialize(&self) -> KernelResult<()> {
-        self.tty.write("Kernel initialization started...\n");
+    fn initialize(&mut self) -> KernelResult<()> {
+        self.tty.write("Kernel initialization started...\n")?;
         self.run_diagnostics()?;
-        self.tty.write("Kernel initialization completed successfully.\n");
+        self.tty.write("Kernel initialization completed successfully.\n")?;
         Ok(())
     }
 
     /// Runs diagnostic tests on the board
-    fn run_diagnostics(&self) -> KernelResult<()> {
-        self.tty.write("Running board diagnostics...\n");
+    fn run_diagnostics(&mut self) -> KernelResult<()> {
+        self.tty.write("Running board diagnostics...\n")?;
         
         // Running the diagnostics
-        diagnostic::test_board_info();
-        
+        diagnostic::test_board_info(); // Note: Ensure this function does not return.
         Ok(())
     }
 }
@@ -62,21 +69,21 @@ impl Kernel {
 #[no_mangle]
 extern "C" fn kernel_main() {
     match Kernel::new() {
-        Ok(kernel) => {
+        Ok(mut kernel) => {
             if let Err(e) = kernel.initialize() {
-                handle_kernel_error(&kernel, &e);
+                handle_kernel_error(&mut kernel, &e);
             }
         }
         Err(e) => {
-            let tty = TTY::new();
-            tty.write(&format!("Failed to initialize Kernel: {:?}\n", e));
+            let mut tty = TTY::new();
+            let _ = tty.write(&format!("Failed to initialize Kernel: {:?}\n", e));
         }
     }
 }
 
 /// Logs kernel errors to TTY
-fn handle_kernel_error(kernel: &Kernel, error: &KernelError) {
-    kernel.tty.write(&format!("Kernel error: {:?}\n", error));
+fn handle_kernel_error(kernel: &mut Kernel, error: &KernelError) {
+    let _ = kernel.tty.write(&format!("Kernel error: {:?}\n", error));
 }
 
 /// Structure representing the state during a panic
@@ -98,31 +105,33 @@ impl PanicState {
     }
 
     /// Handles panic by printing details and signaling an error state
-    fn handle_panic(&self, info: &PanicInfo) {
+    fn handle_panic(&mut self, info: &PanicInfo) {
         self.print_panic_info(info);
         self.configure_panic_led();
         self.blink_led_forever();
     }
 
     /// Prints panic information to TTY
-    fn print_panic_info(&self, info: &PanicInfo) {
-      self.tty.write("Panic occurred!\n");
+    fn print_panic_info(&mut self, info: &PanicInfo) {
+      let _ = self.tty.write("Panic occurred!\n");
+      let _ = self.tty.write("PANIC: ");
   
-      // Print the panic message directly
-      self.tty.write("PANIC: ");
-      self.tty.write(&format!("{:?}", info.message()));
-      self.tty.write("\n");
+      // Directly use the message without treating it as an Option
+      let message = info.message();  // No need for Some check
+      let _ = self.tty.write(&format!("{:?}\n", message));
   
       // Output location information, if available
       if let Some(location) = info.location() {
-          self.tty.write(&format!(
+          let _ = self.tty.write(&format!(
               "Location: {}:{}\n",
               location.file(),
               location.line()
           ));
       }
-    }
+  }
   
+  
+
     /// Configures the LED to indicate a panic state
     fn configure_panic_led(&self) {
         gpio::set_function(self.led_gpio, gpio::Function::Output);
@@ -143,6 +152,6 @@ impl PanicState {
 #[panic_handler]
 #[cfg(feature = "device")]
 fn on_panic(info: &PanicInfo) -> ! {
-    let panic_state = PanicState::new();
+    let mut panic_state = PanicState::new();
     panic_state.handle_panic(info);
 }

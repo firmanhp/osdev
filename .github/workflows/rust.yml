@@ -21,9 +21,13 @@ jobs:
         with:
           toolchain: stable
           override: true
+          components: rust-src, llvm-tools
 
       - name: Add aarch64 target
         run: rustup target add aarch64-unknown-none
 
       - name: Install dependencies
         run: cargo fetch
+      
+      - name: Install aarch64-elf-gcc
+        run: sudo apt-get install -y gcc-aarch64-linux-gnu

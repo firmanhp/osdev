@@ -44,5 +44,4 @@ macro_rules! println {
   }}
 }
 
-pub use print;
 pub use println;
