@@ -7,9 +7,9 @@ use core::result::Result;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum SyscallID {
-  UART_READ,
-  UART_WRITE,
-  UNKNOWN,
+  UartRead,
+  UartWrite,
+  Invalid,
 }
 
 impl TryFrom<u32> for SyscallID {
@@ -17,9 +17,9 @@ impl TryFrom<u32> for SyscallID {
 
   fn try_from(value: u32) -> Result<Self, Self::Error> {
     match value {
-      0 => Ok(SyscallID::UART_READ),
-      1 => Ok(SyscallID::UART_WRITE),
-      _ => Ok(SyscallID::UNKNOWN),
+      0 => Ok(SyscallID::UartRead),
+      1 => Ok(SyscallID::UartWrite),
+      _ => Ok(SyscallID::Invalid),
     }
   }
 }
@@ -41,14 +41,14 @@ pub struct SyscallTable {
 impl SyscallTable {
   pub fn new() -> Self {
     let mut table: [Option<SyscallFn>; 2] = [None; 2];
-    table[SyscallID::UART_READ as usize] = Some(sys_uart_read);
-    table[SyscallID::UART_WRITE as usize] = Some(sys_uart_write);
+    table[SyscallID::UartRead as usize] = Some(sys_uart_read);
+    table[SyscallID::UartWrite as usize] = Some(sys_uart_write);
     SyscallTable { table }
   }
 
   pub fn dispatch(&self, id: SyscallID, arg1: u64, arg2: u64) -> SyscallResult {
-    // Check if the ID is unknown or out of bounds and return InvalidSyscall error
-    if id == SyscallID::UNKNOWN || id as usize >= self.table.len() {
+    // Check if the ID is invalid or out of bounds and return InvalidSyscall error
+    if id == SyscallID::Invalid || id as usize >= self.table.len() {
       return Err(SyscallError::InvalidSyscall);
     }
 
