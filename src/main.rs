@@ -9,6 +9,7 @@ mod diagnostic;
 mod io;
 mod meta;
 mod synchronization;
+mod syscall;
 mod tty;
 
 use core::panic::PanicInfo;
