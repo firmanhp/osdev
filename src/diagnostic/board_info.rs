@@ -82,6 +82,13 @@ fn display_cpu_info(memory_model: &cpu_info::MemoryModel) {
   stream::println!("===================================");
   stream::println!("CPU Information:");
 
+  /*
+  ARMv8-A memory model:
+  When the Stage 1 MMU is disabled:
+  - All data accesses are Device_nGnRnE. We will explain this later in this guide.
+  - All instruction fetches are treated as cacheable.
+  - All addresses have read/write access and are executable.
+  */
   stream::println!("Stage 1 MMU enabled: {}", memory_model.mmu_enabled);
   if !memory_model.mmu_enabled {
     stream::println!("Note: When MMU is disabled:");
