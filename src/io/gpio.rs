@@ -169,7 +169,8 @@ pub fn set_function(mut gpios: u64, function: Function) {
     }
   };
 
-  let mut gpfsel_val: [u32; Reg::GPFSEL_BANK.len()] = [0; Reg::GPFSEL_BANK.len()];
+  let mut gpfsel_val: [u32; Reg::GPFSEL_BANK.len()] =
+    [0; Reg::GPFSEL_BANK.len()];
   for (idx, reg) in Reg::GPFSEL_BANK.iter().enumerate() {
     gpfsel_val[idx] = mmio::read(*reg);
   }
