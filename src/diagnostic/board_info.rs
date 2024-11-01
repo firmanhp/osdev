@@ -27,7 +27,7 @@ impl MemoryRegion {
 }
 
 /// Prints detailed information about a given cache level, including size and capabilities.
-fn print_cache_info(cache: &cpu_info::CacheInfo) {
+fn display_cache_info(cache: &cpu_info::CacheInfo) {
   stream::println!("Cache Level {} - {}", cache.level, cache.cache_type);
 
   if !cache.exists {
@@ -53,7 +53,7 @@ fn print_cache_info(cache: &cpu_info::CacheInfo) {
 }
 
 /// Displays information about the Raspberry Pi board, including firmware, type, and memory layout.
-fn print_board_info(board_info: &board_info::RaspiBoardInfo) {
+fn display_board_info(board_info: &board_info::RaspiBoardInfo) {
   stream::println!("===================================");
   stream::println!("Board Information:");
   stream::println!(
@@ -100,7 +100,7 @@ fn print_board_info(board_info: &board_info::RaspiBoardInfo) {
  *
  * - `Stage 1 MMU enabled`: Indicates if the first stage of the MMU is active.
  */
-fn print_cpu_info(memory_model: &cpu_info::MemoryModel) {
+fn display_cpu_info(memory_model: &cpu_info::MemoryModel) {
   stream::println!("===================================");
   stream::println!("CPU Information:");
 
@@ -120,7 +120,7 @@ fn print_cpu_info(memory_model: &cpu_info::MemoryModel) {
 
   for cache_info in &memory_model.cache {
     stream::println!();
-    print_cache_info(cache_info);
+    display_cache_info(cache_info);
   }
 }
 
@@ -133,11 +133,15 @@ pub fn test_board_info() -> ! {
   stream::println!("Starting Board Information Test");
 
   let board_info = board_info::raspi_board_info();
-  print_board_info(&board_info);
+  display_board_info(&board_info);
 
   let memory_model = cpu_info::get_memory_model();
-  print_cpu_info(&memory_model);
+  display_cpu_info(&memory_model);
 
   stream::println!("\nTest completed successfully");
   loop {}
 }
+
+#[cfg(test)]
+#[path = "board_info_test.rs"]
+mod board_info_test;
