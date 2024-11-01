@@ -10,6 +10,7 @@ device = []
 aarch64 = []
 
 [dependencies]
+lazy_static = "1.4"
 
 [profile.test]
 features = ["host"]
