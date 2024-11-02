@@ -6,6 +6,7 @@ mod boot;
 mod common;
 mod container;
 mod diagnostic;
+mod interrupt;
 mod io;
 mod meta;
 mod synchronization;
