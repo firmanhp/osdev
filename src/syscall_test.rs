@@ -1,14 +1,15 @@
 #[cfg(test)]
+#[cfg(feature = "host")]
 mod tests {
   use super::*;
-  use crate::io::mock_uart::{get_output, set_mock_input, setup};
+  use crate::io::uart;
   use crate::syscall::{SyscallError, SyscallID, SyscallTable};
   use std::convert::TryFrom;
 
   #[test]
   fn test_uart_read_syscall() {
-    setup();
-    set_mock_input("H");
+    uart::init!(mock);
+    uart::mock::set_input("H");
 
     let syscall_table = SyscallTable::new();
     let result = syscall_table.dispatch(SyscallID::UartRead, 0, 0);
@@ -18,13 +19,13 @@ mod tests {
 
   #[test]
   fn test_uart_write_syscall() {
-    setup();
+    uart::init!(mock);
 
     let syscall_table = SyscallTable::new();
     let result = syscall_table.dispatch(SyscallID::UartWrite, 'A' as u64, 0);
 
     assert_eq!(result, Ok(0));
-    assert_eq!(get_output(), vec!['A' as u8]);
+    assert_eq!(uart::mock::get_output(), vec!['A' as u8]);
   }
 
   #[test]

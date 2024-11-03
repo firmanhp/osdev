@@ -22,7 +22,7 @@ pub fn out() -> &'static mut dyn core::fmt::Write {
   unsafe { OUT.assume_init_mut() }
 }
 
-pub fn set_out(streamer: OutputOps) {
+pub fn assign(streamer: OutputOps) {
   unsafe {
     OUT = MaybeUninit::<OutputOps>::new(streamer);
   }

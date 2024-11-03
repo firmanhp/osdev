@@ -1,4 +1,4 @@
-use super::{TTYError, TTY};
+use super::{Tty, TtyError, TtyStreamAdapter};
 use core::fmt::Write;
 use std::sync::Mutex;
 
@@ -7,9 +7,13 @@ static MOCK_UART_BUFFER: Mutex<Vec<u8>> = Mutex::new(Vec::new());
 static MOCK_INPUT: Mutex<Vec<char>> = Mutex::new(Vec::new());
 
 // Test helper functions
-fn setup() {
+fn make_mock() -> TtyStreamAdapter {
   *MOCK_UART_BUFFER.lock().unwrap() = Vec::new();
   *MOCK_INPUT.lock().unwrap() = Vec::new();
+  TtyStreamAdapter {
+    read_char: mock_getc,
+    write_char: mock_putc,
+  }
 }
 
 fn mock_putc(c: u8) {
@@ -30,41 +34,17 @@ fn get_output() -> Vec<u8> {
   MOCK_UART_BUFFER.lock().unwrap().clone()
 }
 
-// Test implementation of TTY methods
-#[cfg(test)]
-impl TTY {
-  pub fn write_char(&mut self, ch: char) -> Result<(), TTYError> {
-    mock_putc(ch as u8);
-    Ok(())
-  }
-
-  pub fn read_char(&mut self) -> Result<char, TTYError> {
-    let c = mock_getc();
-    if c == 0 {
-      Err(TTYError::ReadError)
-    } else {
-      Ok(c as char)
-    }
-  }
-
-  pub fn flush(&mut self) -> Result<(), TTYError> {
-    Ok(())
-  }
-}
-
 #[test]
 fn test_tty_write() {
-  setup();
-  let mut tty = TTY::new();
-  tty.write("Hello, TTY!").expect("Write should succeed");
+  let mut tty = Tty::new(make_mock());
+  tty.write("Hello, Tty!").expect("Write should succeed");
 
-  assert_eq!(get_output(), b"Hello, TTY!");
+  assert_eq!(get_output(), b"Hello, Tty!");
 }
 
 #[test]
 fn test_tty_write_fmt() {
-  setup();
-  let mut tty = TTY::new();
+  let mut tty = Tty::new(make_mock());
   write!(tty, "Value: {}", 42).expect("Write formatting should succeed");
 
   assert_eq!(get_output(), b"Value: 42");
@@ -72,8 +52,7 @@ fn test_tty_write_fmt() {
 
 #[test]
 fn test_tty_read_line() {
-  setup();
-  let mut tty = TTY::new();
+  let mut tty = Tty::new(make_mock());
 
   set_mock_input("Hello\n");
 
@@ -85,19 +64,17 @@ fn test_tty_read_line() {
 
 #[test]
 fn test_tty_ctrl_c() {
-  setup();
-  let mut tty = TTY::new();
+  let mut tty = Tty::new(make_mock());
 
   set_mock_input("\x03");
 
   let result = tty.read_line();
-  assert!(matches!(result, Err(TTYError::ReadError)));
+  assert!(matches!(result, Err(TtyError::ReadError)));
 }
 
 #[test]
 fn test_tty_empty_line() {
-  setup();
-  let mut tty = TTY::new();
+  let mut tty = Tty::new(make_mock());
 
   set_mock_input("\n");
 
@@ -109,8 +86,7 @@ fn test_tty_empty_line() {
 
 #[test]
 fn test_tty_multiple_backspaces() {
-  setup();
-  let mut tty = TTY::new();
+  let mut tty = Tty::new(make_mock());
 
   set_mock_input("\x08Hello\x08\x08\n");
 
@@ -123,8 +99,7 @@ fn test_tty_multiple_backspaces() {
 
 #[test]
 fn test_tty_echo_disable() {
-  setup();
-  let mut tty = TTY::new();
+  let mut tty = Tty::new(make_mock());
   tty.set_echo(false);
 
   set_mock_input("Hello\n");

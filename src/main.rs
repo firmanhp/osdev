@@ -12,9 +12,11 @@ mod synchronization;
 mod syscall;
 mod tty;
 
-use core::panic::PanicInfo;
-use io::{gpio, mmio};
-use tty::{TTYError, TTY};
+use core::{fmt::Write, panic::PanicInfo};
+use io::gpio;
+use io::mmio;
+use io::uart;
+use tty::{Tty, TtyError};
 
 /// Error type for kernel operations
 #[derive(Debug)]
@@ -22,13 +24,13 @@ pub enum KernelError {
   InitializationError(&'static str),
   HardwareError(&'static str),
   IOError(&'static str),
-  TTY(TTYError),
+  Tty(TtyError),
 }
 
-/// Implement conversion from `TTYError` to `KernelError`
-impl From<TTYError> for KernelError {
-  fn from(error: TTYError) -> Self {
-    KernelError::TTY(error)
+/// Implement conversion from `TtyError` to `KernelError`
+impl From<TtyError> for KernelError {
+  fn from(error: TtyError) -> Self {
+    KernelError::Tty(error)
   }
 }
 
@@ -37,24 +39,24 @@ type KernelResult<T> = Result<T, KernelError>;
 
 /// Represents the state and operations of the kernel
 struct Kernel {
-  tty: TTY,
+  tty: Tty,
 }
 
 impl Kernel {
   /// Creates a new Kernel instance, initializing necessary components
-  fn new() -> KernelResult<Self> {
+  fn new() -> Self {
     mmio::init();
-    let tty = TTY::new();
+    let tty = Tty::new(as_tty_adapter());
     Ok(Self { tty })
   }
 
   /// Initializes the kernel and runs diagnostics
   fn initialize(&mut self) -> KernelResult<()> {
-    self.tty.write("Kernel initialization started...\n")?;
-    self.run_diagnostics()?;
+    self.tty.write("Kernel initialization started...\n");
+    self.run_diagnostics();
     self
       .tty
-      .write("Kernel initialization completed successfully.\n")?;
+      .write("Kernel initialization completed successfully.\n");
     Ok(())
   }
 
@@ -70,28 +72,25 @@ impl Kernel {
 
 #[cfg(feature = "device")]
 #[no_mangle]
-extern "C" fn kernel_main() {
-  match Kernel::new() {
-    Ok(mut kernel) => {
-      if let Err(e) = kernel.initialize() {
-        handle_kernel_error(&mut kernel, &e);
-      }
-    }
-    Err(e) => {
-      let mut tty = TTY::new();
-      let _ = tty.write(&format!("Failed to initialize Kernel: {:?}\n", e));
-    }
+extern "C" fn kernel_main() -> ! {
+  mmio::init();
+  uart::init!(bcm2837_pl011);
+  let mut tty = Tty::new(uart::as_tty_adapter());
+  unsafe {
+    tty::set_as_default_tty_and_stream(&mut tty);
   }
+
+  loop {}
 }
 
-/// Logs kernel errors to TTY
+/// Logs kernel errors to Tty
 fn handle_kernel_error(kernel: &mut Kernel, error: &KernelError) {
   let _ = kernel.tty.write(&format!("Kernel error: {:?}\n", error));
 }
 
 /// Structure representing the state during a panic
 struct PanicState {
-  tty: TTY,
+  tty: Tty,
   led_gpio: u64,
 }
 
@@ -102,7 +101,7 @@ impl PanicState {
   /// Initializes a new PanicState
   fn new() -> Self {
     Self {
-      tty: TTY::new(),
+      tty: Tty::new(uart::as_tty_adapter()),
       led_gpio: Self::LED_GPIO,
     }
   }
@@ -114,22 +113,23 @@ impl PanicState {
     self.blink_led_forever();
   }
 
-  /// Prints panic information to TTY
+  /// Prints panic information to Tty
   fn print_panic_info(&mut self, info: &PanicInfo) {
-    let _ = self.tty.write("Panic occurred!\n");
-    let _ = self.tty.write("PANIC: ");
+    core::writeln!(self.tty, "Panic occurred!");
+    core::writeln!(self.tty, "PANIC: ");
 
     // Directly use the message without treating it as an Option
     let message = info.message(); // No need for Some check
-    let _ = self.tty.write(&format!("{:?}\n", message));
+    core::writeln!(self.tty, "{:?}", message);
 
     // Output location information, if available
     if let Some(location) = info.location() {
-      let _ = self.tty.write(&format!(
+      core::writeln!(
+        self.tty,
         "Location: {}:{}\n",
         location.file(),
         location.line()
-      ));
+      );
     }
   }
 

@@ -1,8 +1,9 @@
 use crate::common;
 use crate::io::gpio;
 use crate::io::mmio;
+use crate::io::uart;
 
-// UART0/PL011
+// BCM2837 implementation of UART0/PL011
 
 // Datasheet has typo on 'interrupt' (interupt).
 struct Reg;
@@ -98,7 +99,7 @@ impl Bit {
   const PL011_FR_TXFE: u32 = 1 << 7;
 }
 
-pub fn pl011_init() {
+pub fn device_init() {
   // https://elinux.org/RPi_BCM2835_GPIOs
   // Func0 is TXD0/RXD0
   gpio::set_function((1 << 14) | (1 << 15), gpio::Function::Func0);
@@ -145,31 +146,21 @@ pub fn pl011_init() {
     Bit::PL011_CR_UARTEN | Bit::PL011_CR_RXE | Bit::PL011_CR_TXE,
   );
 
-  // Set the output stream to use this
-  common::stream::set_out(common::stream::OutputOps {
-    write: pl011_puts_result,
+  // Register the device to UART subsystem
+  uart::register_device(uart::Ops {
+    getc: pl011_getc,
+    putc: pl011_putc,
   });
 }
 
-pub fn pl011_getc() -> u8 {
+fn pl011_getc() -> u8 {
   // Wait for any inputs
   while mmio::read(Reg::PL011_FR) & Bit::PL011_FR_RXFE != 0 {}
   return (mmio::read(Reg::PL011_DR) & 0xFF) as u8;
 }
 
-pub fn pl011_putc(c: u8) {
+fn pl011_putc(c: u8) {
   // Wait for TX FIFO not empty
   while mmio::read(Reg::PL011_FR) & Bit::PL011_FR_TXFF != 0 {}
   mmio::write(Reg::PL011_DR, c as u32);
-}
-
-pub fn pl011_puts(s: &str) {
-  for c in s.as_bytes() {
-    pl011_putc(*c);
-  }
-}
-
-fn pl011_puts_result(s: &str) -> Result<(), common::error::ErrorKind> {
-  pl011_puts(s);
-  Ok(())
 }

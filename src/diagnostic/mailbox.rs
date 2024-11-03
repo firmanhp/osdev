@@ -58,7 +58,7 @@ fn print_message_buf<const N: usize>(message: &Message<N>) -> usize {
 // Uses PL011 uart
 pub fn test_mailbox() -> ! {
   // Test Clock mailbox
-  uart::pl011_init();
+  uart::init_with_stream!(bcm2837_pl011);
   stream::println!("Mailbox test: UART Clock rate");
 
   let clock_rate_tag: GetClockRate::Tag = GetClockRate::Request {

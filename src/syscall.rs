@@ -1,8 +1,4 @@
-#[cfg(test)]
-use crate::io::mock_uart::{mock_getc as pl011_getc, mock_putc as pl011_putc};
-#[cfg(not(test))]
-use crate::io::uart::{pl011_getc, pl011_putc};
-
+use crate::io::uart;
 use core::result::Result;
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -61,13 +57,13 @@ impl SyscallTable {
 
 // Syscall handler for UART read
 fn sys_uart_read(_: u64, _: u64) -> SyscallResult {
-  let byte = pl011_getc();
+  let byte = uart::getc();
   Ok(byte as u64)
 }
 
 // Syscall handler for UART write
 fn sys_uart_write(byte: u64, _: u64) -> SyscallResult {
-  pl011_putc(byte as u8);
+  uart::putc(byte as u8);
   Ok(0)
 }
 

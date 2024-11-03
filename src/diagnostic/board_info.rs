@@ -124,12 +124,14 @@ fn display_cpu_info(memory_model: &cpu_info::MemoryModel) {
   }
 }
 
-/// Entry point for the board information test. Initializes UART for serial output,
-/// retrieves board and CPU information, and displays both through the UART stream.
+/// Entry point for the board information test. Initializes UART for serial
+/// output, retrieves board and CPU information, and displays both through the
+/// UART stream.
 ///
-/// This function runs in a continuous loop after output to indicate the completion of the test.
+/// This function runs in a continuous loop after output to indicate the
+/// completion of the test.
 pub fn test_board_info() -> ! {
-  uart::pl011_init();
+  uart::init_with_stream!(bcm2837_pl011);
   stream::println!("Starting Board Information Test");
 
   let board_info = board_info::raspi_board_info();
@@ -141,7 +143,3 @@ pub fn test_board_info() -> ! {
   stream::println!("\nTest completed successfully");
   loop {}
 }
-
-#[cfg(test)]
-#[path = "board_info_test.rs"]
-mod board_info_test;
