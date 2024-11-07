@@ -19,9 +19,10 @@ use io::uart;
 #[cfg(feature = "device")]
 #[no_mangle]
 extern "C" fn kernel_main() -> ! {
+  // Dependency: MMIO -> GPIO -> UART
   mmio::init();
-  uart::uart_init!(bcm2837_pl011);
   gpio::gpio_init!(bcm2837_gpio);
+  uart::uart_init!(bcm2837_pl011);
   diagnostic::test_board_info();
 }
 
