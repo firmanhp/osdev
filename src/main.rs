@@ -21,6 +21,7 @@ use io::uart;
 extern "C" fn kernel_main() -> ! {
   mmio::init();
   uart::init!(bcm2837_pl011);
+  gpio::init!(bcm2837_gpio);
   diagnostic::test_board_info();
 }
 
