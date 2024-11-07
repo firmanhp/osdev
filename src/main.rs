@@ -20,8 +20,8 @@ use io::uart;
 #[no_mangle]
 extern "C" fn kernel_main() -> ! {
   mmio::init();
-  uart::init!(bcm2837_pl011);
-  gpio::init!(bcm2837_gpio);
+  uart::uart_init!(bcm2837_pl011);
+  gpio::gpio_init!(bcm2837_gpio);
   diagnostic::test_board_info();
 }
 
@@ -31,7 +31,7 @@ fn on_panic(info: &core::panic::PanicInfo) -> ! {
   use common::stream;
   const GPIO: u64 = 1 << 27;
 
-  uart::init!(bcm2837_pl011);
+  uart::uart_init!(bcm2837_pl011);
 
   stream::println!(
     "PANIC: {}",

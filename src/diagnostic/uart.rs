@@ -5,7 +5,7 @@ use crate::meta;
 pub fn test_uart() -> ! {
   use common::stream;
 
-  uart::init_with_stream!(bcm2837_pl011);
+  uart::uart_init_with_stream!(bcm2837_pl011);
   stream::println!("UART TEST");
   stream::println!("Hello, kernel World from Rust!");
 

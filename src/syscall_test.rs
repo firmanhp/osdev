@@ -8,7 +8,7 @@ mod tests {
 
   #[test]
   fn test_uart_read_syscall() {
-    uart::init!(mock);
+    uart::uart_init!(mock);
     uart::mock::set_input("H");
 
     let syscall_table = SyscallTable::new();
@@ -19,7 +19,7 @@ mod tests {
 
   #[test]
   fn test_uart_write_syscall() {
-    uart::init!(mock);
+    uart::uart_init!(mock);
 
     let syscall_table = SyscallTable::new();
     let result = syscall_table.dispatch(SyscallID::UartWrite, 'A' as u64, 0);

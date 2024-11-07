@@ -131,7 +131,7 @@ fn display_cpu_info(memory_model: &cpu_info::MemoryModel) {
 /// This function runs in a continuous loop after output to indicate the
 /// completion of the test.
 pub fn test_board_info() -> ! {
-  uart::init_with_stream!(bcm2837_pl011);
+  uart::uart_init_with_stream!(bcm2837_pl011);
   stream::println!("Starting Board Information Test");
 
   let board_info = board_info::raspi_board_info();
