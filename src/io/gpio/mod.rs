@@ -100,7 +100,7 @@ pub fn set_pull_mode(gpios: u64, mode: PullMode) {
 /// // Set GPIO pins 5 and 10 to output
 /// set_function(1 << 5 | 1 << 10, Function::Output);
 /// ```
-pub fn set_function(mut gpios: u64, function: Function) {
+pub fn set_function(gpios: u64, function: Function) {
   unsafe {
     assert!(SET, "GPIO handler not set");
     (OPS.assume_init_ref().set_function)(gpios, function);

@@ -1,4 +1,3 @@
-use crate::common;
 use crate::io::gpio;
 use crate::io::mmio;
 use crate::io::uart;
