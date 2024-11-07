@@ -1,9 +1,8 @@
-use crate::common;
-
 pub type Result<T> = core::result::Result<T, TtyError>;
 
-static mut DEFAULT_TTY: core::mem::MaybeUninit<&mut Tty> =
-  core::mem::MaybeUninit::<&mut Tty>::uninit();
+static mut TTY: core::mem::MaybeUninit<Tty> =
+  core::mem::MaybeUninit::<Tty>::uninit();
+static mut TTY_SET: bool = false;
 
 #[derive(Debug, PartialEq)]
 pub enum TtyError {
@@ -81,14 +80,11 @@ impl Tty {
   }
 }
 
-pub unsafe fn set_as_default_tty_and_stream(tty: &'static mut Tty) {
-  DEFAULT_TTY = core::mem::MaybeUninit::<&mut Tty>::new(tty);
-  common::stream::assign(common::stream::OutputOps {
-    write: |s| {
-      DEFAULT_TTY.assume_init_mut().write(s);
-      core::result::Result::Ok(())
-    },
-  });
+pub fn init(stream_impl: TtyStreamAdapter) {
+  unsafe {
+    TTY = core::mem::MaybeUninit::<Tty>::new(Tty::new(stream_impl));
+    TTY_SET = true;
+  }
 }
 
 impl core::fmt::Write for Tty {
