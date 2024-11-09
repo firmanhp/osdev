@@ -14,5 +14,5 @@ mod tty;
 #[cfg(feature = "device")]
 #[no_mangle]
 extern "C" fn kernel_main() -> ! {
-  diagnostic::test_videocore_base_clock();
+  diagnostic::test_panic();
 }

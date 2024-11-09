@@ -2,10 +2,26 @@ use crate::common::stream;
 use crate::common::synchronization;
 use crate::io::gpio;
 
+static mut OPS: core::mem::MaybeUninit<Ops> =
+  core::mem::MaybeUninit::<Ops>::uninit();
+// This will be set to 0 during bss zero-ing.
+static mut SET: bool = false;
+
+pub struct Ops {
+  pub pre_handler: fn(),
+  pub post_handler: fn() -> !,
+}
+
 #[panic_handler]
 #[cfg(feature = "device")]
 fn on_panic(info: &core::panic::PanicInfo) -> ! {
-  const GPIO: u64 = 1 << 27;
+  unsafe {
+    if !SET {
+      // Can't do anything here
+      loop {}
+    }
+    (OPS.assume_init_ref().pre_handler)();
+  }
 
   stream::println!(
     "PANIC: {}",
@@ -16,13 +32,12 @@ fn on_panic(info: &core::panic::PanicInfo) -> ! {
     stream::println!("{}:{}", location.file(), location.line());
   }
 
-  gpio::set_function(GPIO, gpio::Function::Output);
-  gpio::set_pull_mode(GPIO, gpio::PullMode::Disabled);
+  unsafe { (OPS.assume_init_ref().post_handler)() };
+}
 
-  loop {
-    gpio::output_set(GPIO);
-    synchronization::sleep(250_000);
-    gpio::output_clear(GPIO);
-    synchronization::sleep(250_000);
-  }
+pub fn set_handler(ops: Ops) {
+  unsafe {
+    OPS = core::mem::MaybeUninit::<Ops>::new(ops);
+    SET = true;
+  };
 }

@@ -2,11 +2,13 @@ use crate::io::gpio;
 use crate::io::mmio;
 use crate::io::uart;
 
+use crate::arch::arm64::vendor::broadcom::bcm2837_raspberrypi_3b::panic;
 use crate::arch::arm64::vendor::broadcom::bcm_raspberrypi_common;
 
 #[cfg(feature = "device")]
 #[no_mangle]
 extern "C" fn board_setup() {
+  panic::initialize();
   // Dependency: MMIO -> GPIO -> UART
   mmio::mmio_init!(
     arm64_generic_mmio,

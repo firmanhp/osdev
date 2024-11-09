@@ -1,7 +1,7 @@
 use crate::io::mailbox;
-use crate::metadata::network::{self, MacAddress};
+use crate::metadata::network;
 
-fn get_mac_address() -> MacAddress {
+fn get_mac_address() -> network::MacAddress {
   let hw_board_mac_address_tag =
     mailbox::tag::HwGetBoardMacAddress::Request {}.to_tag();
   let message =
@@ -13,7 +13,7 @@ fn get_mac_address() -> MacAddress {
       .build(),
     );
 
-  MacAddress {
+  network::MacAddress {
     data: mailbox::tag::HwGetBoardMacAddress::read_response(&message)
       .unwrap()
       .mac_address(),
