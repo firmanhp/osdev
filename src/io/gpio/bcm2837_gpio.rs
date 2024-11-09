@@ -1,6 +1,6 @@
+use crate::common::synchronization;
 use crate::io::gpio;
 use crate::io::mmio;
-use crate::synchronization;
 
 /// Total number of GPIO pins available on BCM2837.
 const NUM_GPIOS: u8 = 54;

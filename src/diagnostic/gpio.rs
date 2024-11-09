@@ -1,5 +1,5 @@
+use crate::common::synchronization;
 use crate::io::gpio;
-use crate::synchronization;
 
 pub fn test_led_blink(gpio_ids: u64) {
   gpio::set_function(gpio_ids, gpio::Function::Output);

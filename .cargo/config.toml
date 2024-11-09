@@ -5,4 +5,4 @@ build_device_img = "objcopy --target=aarch64-unknown-none --features device -- -
 
 
 [target.aarch64-unknown-none]
-rustflags = ["-C", "link-arg=-Tsrc/aarch64-raspi3b.ld"]
+rustflags = ["-C", "link-arg=-Tsrc/arch/arm64/vendor/broadcom/bcm2837_raspberrypi_3b/linker.ld"]

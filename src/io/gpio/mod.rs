@@ -82,6 +82,7 @@ pub enum Function {
 /// // Set pull-up on GPIO pins 0 and 1
 /// set_pull_mode(1 << 0 | 1 << 1, PullMode::PullUp);
 /// ```
+#[inline(always)]
 pub fn set_pull_mode(gpios: u64, mode: PullMode) {
   unsafe {
     assert!(SET, "GPIO handler not set");
@@ -100,6 +101,7 @@ pub fn set_pull_mode(gpios: u64, mode: PullMode) {
 /// // Set GPIO pins 5 and 10 to output
 /// set_function(1 << 5 | 1 << 10, Function::Output);
 /// ```
+#[inline(always)]
 pub fn set_function(gpios: u64, function: Function) {
   unsafe {
     assert!(SET, "GPIO handler not set");
@@ -118,6 +120,7 @@ pub fn set_function(gpios: u64, function: Function) {
 /// // Set GPIO pins 5 and 10 to high
 /// output_set(1 << 5 | 1 << 10);
 /// ```
+#[inline(always)]
 pub fn output_set(gpios: u64) {
   unsafe {
     assert!(SET, "GPIO handler not set");
@@ -136,6 +139,7 @@ pub fn output_set(gpios: u64) {
 /// // Clear GPIO pins 5 and 10
 /// output_clear(1 << 5 | 1 << 10);
 /// ```
+#[inline(always)]
 pub fn output_clear(gpios: u64) {
   unsafe {
     assert!(SET, "GPIO handler not set");

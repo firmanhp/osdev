@@ -1,19 +1,10 @@
 use crate::common;
 use crate::io::uart;
-use crate::meta;
 
 pub fn test_uart() -> ! {
   use common::stream;
-
-  uart::uart_init_with_stream!(bcm2837_pl011);
   stream::println!("UART TEST");
   stream::println!("Hello, kernel World from Rust!");
-
-  match meta::board_info::raspi_board_type() {
-    meta::board_info::RaspiBoardType::Pi3 => stream::println!("I am RPi 3"),
-    meta::board_info::RaspiBoardType::Pi4 => stream::println!("I am RPi 4"),
-    _ => stream::println!("I am RPi unsupported"),
-  };
 
   stream::println!(
     "Decimal number print test (expected: 1234567890): {}",

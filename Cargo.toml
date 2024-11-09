@@ -9,6 +9,9 @@ host = []
 device = []
 aarch64 = []
 
+[dependencies]
+arrayvec = { version = "0.7.6", default-features = false, features = ["zeroize"] }
+
 [profile.test]
 features = ["host"]
 

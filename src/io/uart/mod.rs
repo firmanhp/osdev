@@ -15,6 +15,7 @@ struct Ops {
   putc: fn(u8),
 }
 
+#[inline(always)]
 pub fn getc() -> u8 {
   unsafe {
     assert!(SET, "UART not set");
@@ -22,6 +23,7 @@ pub fn getc() -> u8 {
   }
 }
 
+#[inline(always)]
 pub fn putc(ch: u8) {
   unsafe {
     assert!(SET, "UART not set");
@@ -34,6 +36,7 @@ fn putc_unchecked(ch: u8) {
   unsafe { (OPS.assume_init_ref().putc)(ch) }
 }
 
+#[inline(always)]
 pub fn puts(s: &str) {
   unsafe { assert!(SET, "UART not set") };
   for c in s.as_bytes() {

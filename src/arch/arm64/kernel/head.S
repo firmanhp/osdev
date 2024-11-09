@@ -1,3 +1,7 @@
+// Boot entry point for ARM64.
+// Assumes MMU off.
+// BSS must be zeroed out.
+//
 // AArch64 mode
 
 // To keep this in the first portion of the binary.
@@ -34,8 +38,11 @@ _start:
     sub     w6, w6, #1
     cbnz    w6, 1b
 
-    // jump to C code, should not return
-2:  bl      kernel_main
+    // jump to Rust code
+2:  bl      arch_setup
+    bl      board_setup
+    // should not return
+    bl      kernel_main
     // for failsafe, halt this core
 halt:
     wfe

@@ -1,19 +1,10 @@
-use crate::asm;
-use crate::common::bit::{bit_of, bit_of_range};
-
-#[derive(PartialEq, Eq)]
-pub enum CacheType {
-  Data,
-  Instruction,
-  Unified,
-}
-
-#[derive(PartialEq, Eq)]
-pub enum CacheLevel {
-  L1,
-  L2,
-  L3,
-}
+use crate::arch::arm64::asm;
+use crate::common::bit::bit_of;
+use crate::common::bit::bit_of_range;
+use crate::metadata::cpu::CacheInfo;
+use crate::metadata::cpu::CacheLevel;
+use crate::metadata::cpu::CacheType;
+use crate::metadata::cpu::MemoryModel;
 
 struct Bit {}
 impl Bit {
@@ -23,45 +14,6 @@ impl Bit {
   const CSSELR_EL1_L1: u8 = 0b000 << 1;
   const CSSELR_EL1_L2: u8 = 0b001 << 1;
   const CSSELR_EL1_L3: u8 = 0b010 << 1;
-}
-
-impl core::fmt::Display for CacheType {
-  fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-    match self {
-      CacheType::Data => write!(f, "data"),
-      CacheType::Instruction => write!(f, "instruction"),
-      CacheType::Unified => write!(f, "unified"),
-    }
-  }
-}
-
-impl core::fmt::Display for CacheLevel {
-  fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-    match self {
-      CacheLevel::L1 => write!(f, "L1"),
-      CacheLevel::L2 => write!(f, "L2"),
-      CacheLevel::L3 => write!(f, "L3"),
-    }
-  }
-}
-
-pub struct CacheInfo {
-  pub exists: bool,
-  pub level: CacheLevel,
-  pub cache_type: CacheType,
-  pub line_size_bytes: u32,
-  pub associativity: u32,
-  pub num_sets: u32,
-  pub total_size_bytes: u32,
-  pub write_alloc_supported: bool,
-  pub read_alloc_supported: bool,
-  pub write_back_supported: bool,
-  pub write_through_supported: bool,
-}
-
-pub struct MemoryModel {
-  pub cache: [CacheInfo; 4],
-  pub mmu_enabled: bool,
 }
 
 // Internal struct for SCTRL_EL1
@@ -86,7 +38,7 @@ fn read_cache_info(
     }
   } as u64;
   unsafe { core::arch::asm!("msr csselr_el1, {0:x}", in(reg) csselr_el1) };
-  asm::barrier::aarch64::instruction_synchronization!();
+  asm::barrier::instruction_synchronization!();
 
   // https://developer.arm.com/documentation/100442/0100/register-descriptions/aarch64-system-registers/ccsidr-el1--cache-size-id-register--el1?lang=en
   let ccsidr_el1: u32;
@@ -120,12 +72,12 @@ fn read_sctrl_reg() -> SCTRL {
 
 pub fn get_memory_model() -> MemoryModel {
   MemoryModel {
-    cache: [
+    cache: arrayvec::ArrayVec::from_iter([
       read_cache_info(CacheLevel::L1, CacheType::Data),
       read_cache_info(CacheLevel::L1, CacheType::Instruction),
       read_cache_info(CacheLevel::L2, CacheType::Unified),
       read_cache_info(CacheLevel::L3, CacheType::Unified),
-    ],
+    ]),
     mmu_enabled: read_sctrl_reg().m,
   }
 }

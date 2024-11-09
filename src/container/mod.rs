@@ -1,3 +1,4 @@
+pub mod arrayvec_extensions;
 mod queue;
 mod stack;
 

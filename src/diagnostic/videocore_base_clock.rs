@@ -22,7 +22,6 @@ const CLOCK_IDS: [ClockId; 14] = [
 pub fn test_videocore_base_clock() -> ! {
   use crate::common::stream;
   // Test Clock mailbox
-  uart::uart_init_with_stream!(bcm2837_pl011);
   stream::println!("Test VideoCore base clock (via mailbox)");
 
   for clock_id in CLOCK_IDS {
