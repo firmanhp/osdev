@@ -6,7 +6,7 @@ static MOCK_UART_BUFFER: Mutex<Vec<u8>> = Mutex::new(Vec::new());
 static MOCK_INPUT: Mutex<Vec<char>> = Mutex::new(Vec::new());
 
 // Test helper functions
-pub fn device_init() {
+pub fn initialize() {
   *MOCK_UART_BUFFER.lock().unwrap() = Vec::new();
   *MOCK_INPUT.lock().unwrap() = Vec::new();
 

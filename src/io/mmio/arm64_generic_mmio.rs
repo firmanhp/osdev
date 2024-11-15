@@ -3,7 +3,7 @@ use crate::io::mmio;
 
 static mut BASE_OFFSET: u64 = 0x0;
 
-pub fn device_init(base_address: u64) {
+pub fn initialize(base_address: u64) {
   unsafe { BASE_OFFSET = base_address };
   mmio::register_device(mmio::Ops { write, read });
 }

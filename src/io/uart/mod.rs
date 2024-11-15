@@ -67,26 +67,3 @@ pub fn as_tty_adapter() -> tty::TtyStreamAdapter {
     write_char: putc,
   }
 }
-
-// Initialize device driver
-#[macro_export]
-macro_rules! uart_init {
-  ($device_name:ident) => {{
-    use crate::io::uart::$device_name as device;
-    device::device_init();
-  }};
-}
-
-#[macro_export]
-// Initialize device driver, and assign UART into stream subsystem.
-macro_rules! uart_init_with_stream {
-  ($device_name:ident) => {{
-    use crate::io::uart;
-    use crate::io::uart::$device_name as device;
-    device::device_init();
-    uart::set_as_stream();
-  }};
-}
-
-pub use uart_init;
-pub use uart_init_with_stream;

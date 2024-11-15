@@ -12,6 +12,9 @@ aarch64 = []
 [dependencies]
 arrayvec = { version = "0.7.6", default-features = false, features = ["zeroize"] }
 
+[build-dependencies]
+cc = { version = "1.1.37", features = ["parallel"] }
+
 [profile.test]
 features = ["host"]
 

@@ -98,7 +98,8 @@ impl Bit {
   const PL011_FR_TXFE: u32 = 1 << 7;
 }
 
-pub fn device_init() {
+// Initialize device driver.
+pub fn initialize() {
   // https://elinux.org/RPi_BCM2835_GPIOs
   // Func0 is TXD0/RXD0
   gpio::set_function((1 << 14) | (1 << 15), gpio::Function::Func0);

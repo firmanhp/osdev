@@ -56,7 +56,6 @@ fn get_board_info() -> board::BoardInfo {
 fn pull_board_attributes<const N: usize>(
   message: &mailbox::Message<N>,
 ) -> ArrayVec<board::BoardAttribute, { board::ATTRIBUTES_CAP }> {
-  type Attributes = ArrayVec<board::BoardAttribute, { board::ATTRIBUTES_CAP }>;
   let arm_mem_base_address: u32;
   let arm_mem_size_bytes: u32;
   let videocore_mem_base_address: u32;

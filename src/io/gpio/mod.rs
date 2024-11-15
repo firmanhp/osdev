@@ -153,14 +153,3 @@ fn register_device(ops: Ops) {
     SET = true;
   };
 }
-
-// Initialize device driver
-#[macro_export]
-macro_rules! gpio_init {
-  ($device_name:ident) => {{
-    use crate::io::gpio::$device_name as device;
-    device::device_init();
-  }};
-}
-
-pub use gpio_init;

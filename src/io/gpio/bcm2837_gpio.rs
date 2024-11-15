@@ -163,7 +163,8 @@ fn output_clear(mut gpios: u64) {
   mmio::write(Reg::GPCLR1, gpios_1);
 }
 
-pub fn device_init() {
+// Initialize device driver
+pub fn initialize() {
   gpio::register_device(gpio::Ops {
     output_set,
     output_clear,

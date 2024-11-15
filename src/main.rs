@@ -5,14 +5,16 @@ mod arch;
 mod common;
 mod container;
 mod diagnostic;
+mod interrupt;
 mod io;
 mod metadata;
 mod panic;
 mod syscall;
+mod timer;
 mod tty;
 
 #[cfg(feature = "device")]
 #[no_mangle]
 extern "C" fn kernel_main() -> ! {
-  diagnostic::test_panic();
+  diagnostic::test_board_info();
 }

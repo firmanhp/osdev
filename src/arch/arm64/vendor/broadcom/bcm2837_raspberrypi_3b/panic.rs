@@ -8,12 +8,11 @@ use crate::panic;
 fn pre_handler() {
   // pray that these never panic
   // set up required stuffs to be able to print
-  mmio::mmio_init!(
-    arm64_generic_mmio,
-    bcm_raspberrypi_common::mmio::base_address()
+  mmio::arm64_generic_mmio::initialize(
+    bcm_raspberrypi_common::mmio::base_address(),
   );
-  gpio::gpio_init!(bcm2837_gpio);
-  uart::uart_init_with_stream!(bcm2837_pl011);
+  gpio::bcm2837_gpio::initialize();
+  uart::bcm2837_pl011::initialize();
 }
 
 fn post_handler() -> ! {

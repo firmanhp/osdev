@@ -32,14 +32,3 @@ fn register_device(ops: Ops) {
     SET = true;
   };
 }
-
-// Initialize device driver
-#[macro_export]
-macro_rules! mmio_init {
-  ($device_name:ident, $($args:expr),*) => {{
-    use crate::io::mmio::$device_name as device;
-    device::device_init($($args,)*);
-  }};
-}
-
-pub use mmio_init;

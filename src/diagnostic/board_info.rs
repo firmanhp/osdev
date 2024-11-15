@@ -1,5 +1,7 @@
 use crate::common::stream;
+use crate::interrupt::bcm2837_interrupt;
 use crate::metadata::{board, cpu};
+use crate::timer;
 
 /// Prints detailed information about a given cache level, including size and capabilities.
 fn display_cache_info(cache: &cpu::CacheInfo) {
@@ -100,6 +102,20 @@ pub fn test_board_info() -> ! {
   let memory_model = cpu::get_memory_model();
   display_cpu_info(&memory_model);
 
+  stream::println!(
+    "ARM IRQ domain: {:?}",
+    bcm2837_interrupt::domains::ARM.get()
+  );
+  stream::println!(
+    "PERIPHERAL IRQ domain: {:?}",
+    bcm2837_interrupt::domains::PERIPHERAL.get()
+  );
   stream::println!("\nTest completed successfully");
+
+  stream::println!("Timer setup!");
+  timer::set_timer(5000, || {
+    stream::println!("Timer woo woo!");
+  });
+
   loop {}
 }
