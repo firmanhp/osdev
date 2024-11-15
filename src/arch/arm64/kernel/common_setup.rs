@@ -6,7 +6,8 @@ use crate::metadata;
 extern "C" fn arch_setup() {
   metadata::cpu::set_impl(metadata::cpu::Ops {
     get_memory_model: crate::arch::arm64::metadata::cpu::get_memory_model,
+    get_ring_level: crate::arch::arm64::metadata::cpu::get_ring_level,
   });
-  // interrupt_handle::initialize();
-  // interrupt_handle::enable_irq();
+  interrupt_handle::initialize();
+  interrupt_handle::enable_irq();
 }

@@ -5,6 +5,7 @@ static mut SET: bool = false;
 
 pub struct Ops {
   pub get_memory_model: fn() -> MemoryModel,
+  pub get_ring_level: fn() -> u32,
 }
 
 #[derive(PartialEq, Eq)]
@@ -65,6 +66,14 @@ pub fn get_memory_model() -> MemoryModel {
   unsafe {
     assert!(SET, "No impl");
     (OPS.assume_init_ref().get_memory_model)()
+  }
+}
+
+#[inline(always)]
+pub fn get_ring_level() -> u32 {
+  unsafe {
+    assert!(SET, "No impl");
+    (OPS.assume_init_ref().get_ring_level)()
   }
 }
 

@@ -42,6 +42,7 @@ impl Bit {
 fn set_timer(jiffies: u32) {
   // TOOD: mask interrupt while setting
   let current_counter = mmio::read(Reg::ST_CLO);
+  crate::common::stream::println!("Counter: {}, {} ", current_counter, jiffies);
   mmio::write(Reg::ST_C1, current_counter + jiffies);
 }
 

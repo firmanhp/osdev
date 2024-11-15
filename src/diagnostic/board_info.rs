@@ -112,10 +112,5 @@ pub fn test_board_info() -> ! {
   );
   stream::println!("\nTest completed successfully");
 
-  stream::println!("Timer setup!");
-  timer::set_timer(5000, || {
-    stream::println!("Timer woo woo!");
-  });
-
   loop {}
 }

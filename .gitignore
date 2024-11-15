@@ -1,7 +1,7 @@
 
 .DS_Store
 osdev.img
-
+objdump_out
 
 # Added by cargo
 

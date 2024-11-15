@@ -16,5 +16,5 @@ mod tty;
 #[cfg(feature = "device")]
 #[no_mangle]
 extern "C" fn kernel_main() -> ! {
-  diagnostic::test_board_info();
+  diagnostic::test_interrupt();
 }

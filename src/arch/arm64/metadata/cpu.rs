@@ -1,4 +1,5 @@
 use crate::arch::arm64::asm;
+use crate::common::bit;
 use crate::common::bit::bit_of;
 use crate::common::bit::bit_of_range;
 use crate::metadata::cpu::CacheInfo;
@@ -80,4 +81,10 @@ pub fn get_memory_model() -> MemoryModel {
     ]),
     mmu_enabled: read_sctrl_reg().m,
   }
+}
+
+pub fn get_ring_level() -> u32 {
+  let mut level: u32;
+  unsafe { core::arch::asm!("mrs {0:x}, CurrentEL", out(reg) level) };
+  return bit::bit_of_range::<3, 2>(level);
 }

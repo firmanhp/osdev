@@ -3,4 +3,4 @@
 qemu-system-aarch64 \
   -nographic \
   -M raspi3b \
-  -kernel target/aarch64-unknown-none/debug/osdev
+  -device loader,file=osdev.img,addr=0x80000,cpu-num=0
