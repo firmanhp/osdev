@@ -5,7 +5,7 @@ static mut SET: bool = false;
 
 pub struct Ops {
   pub get_memory_model: fn() -> MemoryModel,
-  pub get_ring_level: fn() -> u32,
+  pub get_ring_level: fn() -> PrivilegeLevel,
 }
 
 #[derive(PartialEq, Eq)]
@@ -20,6 +20,14 @@ pub enum CacheLevel {
   L1,
   L2,
   L3,
+}
+
+#[derive(PartialEq, Eq)]
+pub enum PrivilegeLevel {
+  User,
+  Kernel,
+  Hypervisor, // optional
+  Firmware,   // highest level
 }
 
 impl core::fmt::Display for CacheType {
@@ -38,6 +46,17 @@ impl core::fmt::Display for CacheLevel {
       CacheLevel::L1 => write!(f, "L1"),
       CacheLevel::L2 => write!(f, "L2"),
       CacheLevel::L3 => write!(f, "L3"),
+    }
+  }
+}
+
+impl core::fmt::Display for PrivilegeLevel {
+  fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    match self {
+      PrivilegeLevel::Firmware => write!(f, "Firmware"),
+      PrivilegeLevel::Hypervisor => write!(f, "Hypervisor"),
+      PrivilegeLevel::Kernel => write!(f, "Kernel"),
+      PrivilegeLevel::User => write!(f, "User"),
     }
   }
 }
@@ -70,7 +89,7 @@ pub fn get_memory_model() -> MemoryModel {
 }
 
 #[inline(always)]
-pub fn get_ring_level() -> u32 {
+pub fn get_ring_level() -> PrivilegeLevel {
   unsafe {
     assert!(SET, "No impl");
     (OPS.assume_init_ref().get_ring_level)()

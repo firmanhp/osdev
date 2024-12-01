@@ -1,3 +1,5 @@
+use core::default;
+
 use crate::arch::arm64::asm;
 use crate::common::bit;
 use crate::common::bit::bit_of;
@@ -6,6 +8,7 @@ use crate::metadata::cpu::CacheInfo;
 use crate::metadata::cpu::CacheLevel;
 use crate::metadata::cpu::CacheType;
 use crate::metadata::cpu::MemoryModel;
+use crate::metadata::cpu::PrivilegeLevel;
 
 struct Bit {}
 impl Bit {
@@ -83,8 +86,15 @@ pub fn get_memory_model() -> MemoryModel {
   }
 }
 
-pub fn get_ring_level() -> u32 {
+pub fn get_ring_level() -> PrivilegeLevel {
   let mut level: u32;
   unsafe { core::arch::asm!("mrs {0:x}, CurrentEL", out(reg) level) };
-  return bit::bit_of_range::<3, 2>(level);
+  level = bit::bit_of_range::<3, 2>(level);
+  match (level) {
+    0 => PrivilegeLevel::User,
+    1 => PrivilegeLevel::Kernel,
+    2 => PrivilegeLevel::Hypervisor,
+    3 => PrivilegeLevel::Firmware,
+    _ => panic!("Unknown privilege level"),
+  }
 }
