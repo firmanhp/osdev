@@ -7,7 +7,7 @@ qemu-system-aarch64 \
   -s -S \
   -nographic \
   -M raspi3b \
-  -kernel target/aarch64-unknown-none/debug/osdev
-  # -device loader,file=target/aarch64-unknown-none/debug/osdev,addr=0x80000,cpu-num=0
+  -device loader,file=osdev.img,addr=0x80000,cpu-num=0
+  # -kernel target/aarch64-unknown-none-softfloat/debug/osdev
   # -kernel out/img/kernel7.img
   # -kernel out/img/myos.elf

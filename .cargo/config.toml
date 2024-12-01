@@ -1,8 +1,10 @@
 [alias]
 test_host = "test --target=aarch64-apple-darwin"
-build_device = "build --target=aarch64-unknown-none --features device"
-build_device_img = "objcopy --target=aarch64-unknown-none --features device -- -O binary osdev.img"
+build_device = "build --target=aarch64-unknown-none-softfloat --features device"
+build_device_img = "objcopy --target=aarch64-unknown-none-softfloat --features device -- -O binary osdev.img"
 
 
-[target.aarch64-unknown-none]
-rustflags = ["-C", "link-arg=-Tsrc/arch/arm64/vendor/broadcom/bcm2837_raspberrypi_3b/linker.ld"]
+[target.aarch64-unknown-none-softfloat]
+rustflags = [
+  "-C", "link-arg=-Tsrc/arch/arm64/vendor/broadcom/bcm2837_raspberrypi_3b/linker.ld",
+]
