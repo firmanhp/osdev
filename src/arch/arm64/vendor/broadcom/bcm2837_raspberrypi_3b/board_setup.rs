@@ -20,6 +20,7 @@ extern "C" fn board_setup() {
   // interrupt requires MMIO
   bcm2837_interrupt::initialize();
   gpio::bcm2837_gpio::initialize();
+  // UART requires GPIO
   uart::bcm2837_pl011::initialize();
   uart::set_as_stream();
   // network requires MMIO, mailbox
