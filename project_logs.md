@@ -34,4 +34,7 @@ core::num::{impl#11}::count_ones () at /rustc/eeb90cda1969383f56a2637cbd3037bdf5
   - we have `aarch64-unknown-none-softfloat` to use software floating points
   - `"features": "+v8a,+strict-align,-neon,-fp-armv8",`
 
-
+# 08/12/2024
+- Interrupt setting has an issue in VBAR_EL1 assignment
+- I accidentally passed a dereferenced the address
+- Timer works now, although there is no clear mapping to real time calc for now.

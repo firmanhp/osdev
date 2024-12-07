@@ -1,7 +1,7 @@
 use crate::{common::stream, interrupt};
 
 extern "C" {
-  static _irq_vectors: *const ();
+  static _irq_vectors: [u8; 0];
 }
 
 #[no_mangle]
@@ -23,7 +23,10 @@ extern "C" fn on_invalid_irq(irq_type: u64, esr_el1: u64, elr_el1: u64) -> ! {
 }
 
 pub fn initialize() {
-  unsafe { core::arch::asm!("msr vbar_el1, {0:x}", in(reg) _irq_vectors) };
+  unsafe {
+    core::arch::asm!("msr vbar_el1, {0:x}", in(reg) _irq_vectors.as_ptr())
+  };
+  unsafe { core::arch::asm!("nop") };
 }
 
 pub fn enable_irq() {

@@ -185,8 +185,6 @@ fn serve_interrupt(handlers: &[interrupt::HandlerMeta]) {
     handle_if(h, p2, Bit::IRQ_2_PCM, domains::PERIPHERAL, 55);
     handle_if(h, p2, Bit::IRQ_2_UART, domains::PERIPHERAL, 57);
   }
-
-  todo!();
 }
 
 #[inline(always)]
