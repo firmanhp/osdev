@@ -37,9 +37,11 @@ fn do_callback() {
       CALLBACK_SET,
       "do_callback was called on uninitialized callback"
     );
-    (IRQ_CALLBACK.assume_init_ref())();
+    // clear out first, then execute
+    let callback = IRQ_CALLBACK.assume_init();
     IRQ_CALLBACK = core::mem::MaybeUninit::uninit();
     CALLBACK_SET = false;
+    callback();
   }
 }
 

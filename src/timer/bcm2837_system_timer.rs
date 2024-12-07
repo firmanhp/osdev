@@ -13,6 +13,9 @@ pub struct InitParams {
   pub irq_channel: interrupt::IrqChannel,
 }
 
+static mut IRQ_CHANNEL: core::mem::MaybeUninit<interrupt::IrqChannel> =
+  core::mem::MaybeUninit::uninit();
+
 struct Reg;
 #[allow(dead_code)]
 impl Reg {
@@ -40,20 +43,22 @@ impl Bit {
 }
 
 fn set_timer(jiffies: u32) {
-  // TOOD: mask interrupt while setting
+  unsafe { interrupt::mask_interrupt(IRQ_CHANNEL.assume_init()) };
   let current_counter = mmio::read(Reg::ST_CLO);
-  crate::common::stream::println!("Counter: {}, {} ", current_counter, jiffies);
+  // crate::common::stream::println!("Counter: {}, {} ", current_counter, jiffies);
   mmio::write(Reg::ST_C1, current_counter + jiffies);
+  unsafe { interrupt::unmask_interrupt(IRQ_CHANNEL.assume_init()) };
 }
 
 fn handle_irq() {
   // mask?
+  unsafe { interrupt::mask_interrupt(IRQ_CHANNEL.assume_init()) };
   mmio::write(Reg::ST_CS, Bit::ST_CS_M1);
   timer::do_callback();
 }
 
 pub fn initialize(params: InitParams) {
+  unsafe { IRQ_CHANNEL = core::mem::MaybeUninit::new(params.irq_channel) };
   interrupt::set_handler(params.irq_channel, handle_irq);
-  interrupt::unmask_interrupt(params.irq_channel);
   timer::register_device(timer::Ops { set_timer });
 }
