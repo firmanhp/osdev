@@ -38,3 +38,11 @@ core::num::{impl#11}::count_ones () at /rustc/eeb90cda1969383f56a2637cbd3037bdf5
 - Interrupt setting has an issue in VBAR_EL1 assignment
 - I accidentally passed a dereferenced the address
 - Timer works now, although there is no clear mapping to real time calc for now.
+
+# 09/12/2024
+- UART interrupt implemented, added callbacks (rx interrupt only)
+  - test on `diagnostic/uart_interrupt.rs`
+- On device execution is broken. Probably starting from EL3 -> EL1 logic
+- Debugging without the EL switch shows that it is running on "Hypervisor" mode
+  - This means EL2. We should properly adjust our code to also handle starting
+    from EL2.
