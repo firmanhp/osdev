@@ -4,6 +4,7 @@ mod interrupt;
 mod mailbox;
 mod panic;
 mod uart;
+mod uart_interrupt;
 mod videocore_base_clock;
 
 pub use board_info::test_board_info;
@@ -12,4 +13,5 @@ pub use interrupt::test_interrupt;
 pub use mailbox::test_mailbox;
 pub use panic::test_panic;
 pub use uart::test_uart;
+pub use uart_interrupt::test_uart_interrupt;
 pub use videocore_base_clock::test_videocore_base_clock;

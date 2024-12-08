@@ -16,7 +16,8 @@ mod tty;
 #[cfg(feature = "device")]
 #[no_mangle]
 extern "C" fn kernel_main() -> ! {
-  diagnostic::test_interrupt();
+  // diagnostic::test_interrupt();
   // diagnostic::test_uart();
   // diagnostic::test_panic();
+  diagnostic::test_uart_interrupt();
 }

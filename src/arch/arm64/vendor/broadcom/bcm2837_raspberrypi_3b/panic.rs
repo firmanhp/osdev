@@ -1,5 +1,7 @@
 use crate::arch::arm64::vendor::broadcom::bcm_raspberrypi_common;
 use crate::common::synchronization;
+use crate::interrupt;
+use crate::interrupt::bcm2837_interrupt;
 use crate::io::gpio;
 use crate::io::mmio;
 use crate::io::uart;
@@ -12,7 +14,12 @@ fn pre_handler() {
     bcm_raspberrypi_common::mmio::base_address(),
   );
   gpio::bcm2837_gpio::initialize();
-  uart::bcm2837_pl011::initialize();
+  uart::bcm2837_pl011::initialize(uart::bcm2837_pl011::InitParams {
+    irq_channel: interrupt::IrqChannel {
+      domain: bcm2837_interrupt::domains::PERIPHERAL,
+      number: 57,
+    },
+  });
 }
 
 fn post_handler() -> ! {

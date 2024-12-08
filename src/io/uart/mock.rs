@@ -13,6 +13,7 @@ pub fn initialize() {
   uart::register_device(uart::Ops {
     putc: mock_putc,
     getc: mock_getc,
+    interrupt_enable: None,
   });
 }
 

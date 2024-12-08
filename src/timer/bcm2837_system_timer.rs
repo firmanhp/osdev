@@ -51,7 +51,6 @@ fn set_timer(jiffies: u32) {
 }
 
 fn handle_irq() {
-  // mask?
   unsafe { interrupt::mask_interrupt(IRQ_CHANNEL.assume_init()) };
   mmio::write(Reg::ST_CS, Bit::ST_CS_M1);
   timer::do_callback();

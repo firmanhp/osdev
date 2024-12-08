@@ -21,7 +21,12 @@ extern "C" fn board_setup() {
   bcm2837_interrupt::initialize();
   gpio::bcm2837_gpio::initialize();
   // UART requires GPIO
-  uart::bcm2837_pl011::initialize();
+  uart::bcm2837_pl011::initialize(uart::bcm2837_pl011::InitParams {
+    irq_channel: interrupt::IrqChannel {
+      domain: bcm2837_interrupt::domains::PERIPHERAL,
+      number: 57,
+    },
+  });
   uart::set_as_stream();
   // network requires MMIO, mailbox
   bcm_raspberrypi_common::network::initialize();
